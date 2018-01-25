@@ -1,3 +1,5 @@
+# Author: Mark Hugley
+# Updated: 1/25/2018
 import subprocess
 import os
 import time
