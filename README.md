@@ -3,6 +3,7 @@
 Requirement
 -----------
 Python 3
+.chef directory with PEM and KEY
 
 ## What It Does
 
