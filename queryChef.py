@@ -1,5 +1,3 @@
-# Author: Mark Hugley
-# Updated: 1/25/2018
 import subprocess
 import os
 import time
@@ -53,6 +51,30 @@ def searchList():
                 time.sleep(3)
             chefServers.close()
 
+# Add recipe to all servers
+def multiRecipe():
+    chefServers = open(os.path.join(_location_, 'chefservers.txt'))
+    chefServersContent = chefServers.read()
+    chefServerList = chefServersContent.split('\n')
+    recipes = open('recipes.txt', 'a')
+    print('Which recipe would you like to add to all servers?')
+    answer = input()
+    recipes = open('recipes.txt', 'a')
+    for i in range(len(chefServerList)):
+        recipes.write('knife node run_list add ' + chefServerList[i] + ' \'recipe[%s]\' \n' % (answer))
+    print('Would you like to run the recipe? ')
+    runRecipeAnswer = input()
+    runRecipe3 = open(os.path.join(_location_, 'recipes.txt'))
+    runRecipe3Content = runRecipe3.read()
+    runRecipe3List = runRecipe3Content.split('\n')
+    if runRecipeAnswer.lower().startswith('y'):
+        for addRecipe in runRecipe3List:
+            runRecipe = subprocess.call(addRecipe, shell=True)
+            print(runRecipe)
+    recipes.close()
+    chefServers.close()
+
+
 # Deletes File when done
 def removeFile():
     f = os.path.join(_location_, 'chefservers.txt')
@@ -61,6 +83,14 @@ def removeFile():
 # Delete bootstrapping file if it exists.
 def removebootstrapping():
     f = os.path.join(_location_, 'bootstrapping.txt')
+    try:
+        os.remove(f)
+    except OSError:
+        pass
+
+# Delete recipe file if it exists.
+def removeRecipe():
+    f = os.path.join(_location_, 'recipes.txt')
     try:
         os.remove(f)
     except OSError:
@@ -137,7 +167,7 @@ while True:
     print('Welcome to Chef')
     print('WARNING -- You need to be in your chef-repo')
     print('What would you like to do?')    
-    print('Press [1] for list of servers, [2] for cookbooks, [3] for search [4] for bootstrapping or [q] for quit')
+    print('[1] for list of servers \n[2] for cookbooks \n[3] for search \n[4] for bootstrapping or \n[q] for quit')
     answer = input()
     if answer == '1':
         listServers()
@@ -147,6 +177,8 @@ while True:
         searchList()
     elif answer == '4':
         bootstrapping()
+    elif answer == '5':
+        multiRecipe()
     else:
         break
 print('Remove all cached files? (yes or no)')
@@ -154,3 +186,4 @@ removeFiles = input().lower()
 if removeFiles.startswith('y'):
     removeFile()
     removebootstrapping()
+    removeRecipe()
