@@ -2,6 +2,7 @@ import subprocess
 import os
 import time
 import sys
+import getpass
 
 _location_ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
 
@@ -53,7 +54,7 @@ def searchList():
 
 # Add recipe to all servers
 def multiRecipe():
-    chefServers = open(os.path.join(_location_, 'chefservers.txt'))
+    chefServers = open(os.path.join(_location_, 'chefservers2.txt'))
     chefServersContent = chefServers.read()
     chefServerList = chefServersContent.split('\n')
     recipes = open('recipes.txt', 'a')
@@ -74,44 +75,23 @@ def multiRecipe():
     recipes.close()
     chefServers.close()
 
+def addRecipe():
+    recipe = input('Which recipe would you like to add \n')
+    server = input('Which Server? \n')
+    recipeServer = 'knife node run_list add %s \'recipe[%s]\'' % (server, recipe)
+    oneAdd = subprocess.call(recipeServer, shell=True)
+    print(oneAdd)
+    pause()
 
-# Deletes File when done
-def removeFile():
-    f = os.path.join(_location_, 'chefservers.txt')
-    os.remove(f)
-
-# Delete bootstrapping file if it exists.
-def removebootstrapping():
-    f = os.path.join(_location_, 'bootstrapping.txt')
-    try:
-        os.remove(f)
-    except OSError:
-        pass
-
-# Delete recipe file if it exists.
-def removeRecipe():
-    f = os.path.join(_location_, 'recipes.txt')
-    try:
-        os.remove(f)
-    except OSError:
-        pass
-
-# TODO: Add subprocess to run the file
 # This function is for bootstrapping windows and linux servers
 def bootstrapping():
     while True:
-        print('Press [1] for Windows and [2] for Linux')
-        option = input()
-        print('What is the ip address?(In AD leave blank) ')
-        ipaddress = input()
-        print('What is the name of the server? ')
-        server = input()
-        print('What is the admin name? ')
-        admin = input()
-        print('Please enter password? ')
-        password = input()
-        print('Please enter recipes? ')
-        recipes = input()
+        option = input('Press [1] for Windows and [2] for Linux\n')
+        ipaddress = input('What is the ip address?(In AD leave blank)\n ')
+        server = input('What is the name of the server?\n ')
+        admin = input('What is the admin name?\n ')
+        password = getpass.getpass('Please enter password?\n')
+        recipes = input('Please enter recipes?\n ')
         if ipaddress == '':
             if option == '1':
                 print('You choose windows')
@@ -158,6 +138,27 @@ def bootstrapping():
         print(runBootstrapping)
     bootstrapping.close()
 
+# Deletes File when done
+def removeFile():
+    f = os.path.join(_location_, 'chefservers.txt')
+    os.remove(f)
+
+# Delete bootstrapping file if it exists.
+def removebootstrapping():
+    f = os.path.join(_location_, 'bootstrapping.txt')
+    try:
+        os.remove(f)
+    except OSError:
+        pass
+
+# Delete recipe file if it exists.
+def removeRecipe():
+    f = os.path.join(_location_, 'recipes.txt')
+    try:
+        os.remove(f)
+    except OSError:
+        pass
+
 # Start of Program
 print('Welcome to Chef.... Please Wait')
 subprocess.call('knife node list | sort > chefservers.txt', shell=True)
@@ -167,7 +168,7 @@ while True:
     print('Welcome to Chef')
     print('WARNING -- You need to be in your chef-repo')
     print('What would you like to do?')    
-    print('[1] for list of servers \n[2] for cookbooks \n[3] for search \n[4] for bootstrapping or \n[q] for quit')
+    print('[1] List of servers \n[2] Cookbooks \n[3] Search \n[4] Bootstrapping \n[5] Bulk Add\n[6] Add Recipe \n[q] Quit')
     answer = input()
     if answer == '1':
         listServers()
@@ -179,6 +180,8 @@ while True:
         bootstrapping()
     elif answer == '5':
         multiRecipe()
+    elif answer == '6':
+        addRecipe()
     else:
         break
 print('Remove all cached files? (yes or no)')
