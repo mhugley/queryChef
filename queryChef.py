@@ -32,7 +32,7 @@ def cookbookList():
     pause()
 
 # Search the list for the server
-# TODO: need to replace with regex for searching
+# Replace by searchList_regex
 def searchList():
     while True:
         print('please enter [server name] or [q] to quit? ')
@@ -51,6 +51,22 @@ def searchList():
                 print('Server: ' + serverName + ' is not present')
                 time.sleep(3)
             chefServers.close()
+
+def searchList_regex():
+    while True:
+        print('please enter [server name] or [q] to quit? ')
+        serverName = input()
+        if serverName == 'q':
+            break
+        else:
+            chefServers = open(os.path.join(_location_, 'chefservers.txt'))
+            chefServersContent = chefServers.read()
+            chefServerList = chefServersContent.split('\n')
+            for i in chefServerList:
+                if re.search(r"^" + serverName,i,re.IGNORECASE):
+                    print('Server: ' + i)
+            chefServers.close()
+            pause()
 
 # Add recipe to all servers
 def multiRecipe():
@@ -233,7 +249,7 @@ while True:
     elif answer == '2':
         cookbookList()
     elif answer == '3':
-        searchList()
+        searchList_regex()
     elif answer == '4':
         bootstrapping()
     elif answer == '5':
