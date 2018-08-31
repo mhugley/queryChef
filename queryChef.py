@@ -90,13 +90,14 @@ def bootstrapping():
         ipaddress = input('What is the ip address?(In AD leave blank)\n ')
         server = input('What is the name of the server?\n ')
         admin = input('What is the admin name?\n ')
-        password = getpass.getpass('Please enter password?\n')
-        recipes = input('Please enter recipes?\n ')
+        password = input('Please enter password?\n ')
+        # password = getpass.getpass('Please enter password?\n')
+        recipes = recipes1()
         if ipaddress == '':
             if option == '1':
                 print('You choose windows')
                 installchef = open('bootstrapping.txt', 'a')
-                installchef.write('knife bootstrap windows winrm %s -N %s --winrm-user %s --winrm-password %s --run-list \'recipe[%s]\' \n' % (server, server, admin, password, recipes))
+                installchef.write('knife bootstrap windows winrm %s -N %s --winrm-user %s --winrm-password %s --run-list \'%s\' \n' % (server, server, admin, password, recipes))
                 print('Would you like to add another server? (yes, no) ')
                 anotherServer = input().lower()
                 if anotherServer.startswith('n'):
@@ -105,7 +106,7 @@ def bootstrapping():
             else:
                 print('You choose linux')
                 installchef = open('bootstrapping.txt', 'a')
-                installchef.write('knife bootstrap %s -N %s -x %s --ssh-password %s --run-list \'recipe[%s]\' --sudo \n' % (server, server, admin, password, recipes))
+                installchef.write('knife bootstrap %s -N %s -x %s --ssh-password %s --run-list \'%s\' --sudo \n' % (server, server, admin, password, recipes))
                 print('Would you like to add another server? (yes, no) ')
                 anotherServer = input().lower()
                 if anotherServer.startswith('n'):
@@ -115,7 +116,7 @@ def bootstrapping():
             if option == '1':
                 print('You choose windows')
                 installchef = open('bootstrapping.txt', 'a')
-                installchef.write('knife bootstrap windows winrm %s -N %s --winrm-user %s --winrm-password %s --run-list \'recipe[%s]\' \n' % (ipaddress, server, admin, password, recipes))
+                installchef.write('knife bootstrap windows winrm %s -N %s --winrm-user %s --winrm-password %s --run-list \'%s\' \n' % (ipaddress, server, admin, password, recipes))
                 print('Would you like to add another server? (yes, no) ')
                 anotherServer = input().lower()
                 if anotherServer.startswith('n'):
@@ -124,7 +125,7 @@ def bootstrapping():
             else:
                 print('You choose linux')
                 installchef = open('bootstrapping.txt', 'a')
-                installchef.write('knife bootstrap %s -N %s -x %s --ssh-password %s --run-list \'recipe[%s]\' --sudo \n' % (ipaddress, server, admin, password, recipes))
+                installchef.write('knife bootstrap %s -N %s -x %s --ssh-password %s --run-list \'%s\' --sudo \n' % (ipaddress, server, admin, password, recipes))
                 print('Would you like to add another server? (yes, no) ')
                 anotherServer = input().lower()
                 if anotherServer.startswith('n'):
@@ -138,6 +139,47 @@ def bootstrapping():
         print(runBootstrapping)
     bootstrapping.close()
 
+# Remove Old Servers From Chef Server
+def list5hourOld():
+	print ('This will list all servers that have not communicated with the chef server in 24 hours')
+	# subprocess.call("knife search node \"ohai_time:[* TO $(date +\%s -d \'5 hours ago\')]\"", shell=True)
+	oldServer = "knife search node \"ohai_time:[* TO $(date +\%s -d \'5 hours ago\')]\" -i"
+	for node in oldServer:
+		print(node)
+
+def removeServers():
+        answer = input('Which server would you like to remove?')
+        try:
+        	removeServerText = open('RemoveServers.txt', 'a')
+        except IOError:
+        	print("File not found or path is incorrect")
+        finally:
+	        removeServerText.write('knife node list | grep -i %s' % (answer))
+	        textfile = open(os.path.join(_location_, 'RemoveServers.txt'))
+	        textfileContent = textfile.read()
+	        textfileList = textfileContent.split('\n')
+	        for serverName in textfileList:
+	            runtextfile = subprocess.call(serverName, shell=True)
+	            print(runtextfile)
+	        removeServerText.close()
+
+# Add recipes to list and format for bootstapping
+run_list = []
+def recipes1():
+    run_list_modified = ""
+    while True:
+        recipes = input('Please enter recipes? or q to quit\n ')
+        if recipes != 'q':
+            run_list.append(recipes)
+            print(run_list)
+        else:
+            break
+    for i in run_list:
+        run_list_modified += "recipe[%s]," %(i)
+    print(run_list_modified)
+    run_list_modified = run_list_modified.rstrip(',')
+    return run_list_modified
+        
 # Deletes File when done
 def removeFile():
     f = os.path.join(_location_, 'chefservers.txt')
@@ -168,8 +210,8 @@ while True:
     print('Welcome to Chef')
     print('WARNING -- You need to be in your chef-repo')
     print('What would you like to do?')    
-    print('[1] List of servers \n[2] Cookbooks \n[3] Search \n[4] Bootstrapping \n[5] Bulk Add\n[6] Add Recipe \n[q] Quit')
-    answer = input()
+    print('[1] List of servers \n[2] Cookbooks \n[3] Search \n[4] Bootstrapping \n[5] Bulk Add \n[6] Add Recipe \n[7] Remove Old Servers \n[q] Quit')
+    answer = input('\n>> ')
     if answer == '1':
         listServers()
     elif answer == '2':
@@ -182,7 +224,13 @@ while True:
         multiRecipe()
     elif answer == '6':
         addRecipe()
+    elif answer == '7':
+    	list5hourOld()
+    elif answer == '8':
+        removeServers()
     else:
+
+
         break
 print('Remove all cached files? (yes or no)')
 removeFiles = input().lower()
