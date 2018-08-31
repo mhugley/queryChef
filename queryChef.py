@@ -32,7 +32,7 @@ def cookbookList():
     pause()
 
 # Search the list for the server
-# TODO: split domain name from server when searching
+# TODO: need to replace with regex for searching
 def searchList():
     while True:
         print('please enter [server name] or [q] to quit? ')
