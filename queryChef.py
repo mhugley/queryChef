@@ -3,6 +3,7 @@ import os
 import time
 import sys
 import getpass
+import re
 
 _location_ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
 
@@ -21,7 +22,7 @@ def listServers():
     answer = input().lower()
     if answer.startswith('y'):
         for i in range(len(chefServerList)-1):
-            print("Server[" + str(i + 1) + "]: " + chefServerList[i].lower())
+            print("Server[" + str(i + 1) + "]: " + chefServerList[i])
         pause()
     chefServers.close()
 
@@ -74,12 +75,21 @@ def multiRecipe():
     recipes.close()
     chefServers.close()
 
+# Add recipe to specified instance
 def addRecipe():
     recipe = input('Which recipe would you like to add \n')
     server = input('Which Server? \n')
-    recipeServer = 'knife node run_list add %s \'recipe[%s]\'' % (server, recipe)
-    oneAdd = subprocess.call(recipeServer, shell=True)
-    print(oneAdd)
+    chefServers = open(os.path.join(_location_, 'chefservers.txt'))
+    chefServersContent = chefServers.read()
+    chefServerList = chefServersContent.split('\n')
+    for i in chefServerList:
+        if server.lower() == i.lower():
+            recipeServer = 'knife node run_list add %s \'recipe[%s]\'' % (i, recipe)
+            add_recipe = input("Are you sure you want to add %s to this recipe %s (y or no)\n>> " % (i, recipe))
+            if add_recipe.startswith('y'):
+                oneAdd = subprocess.call(recipeServer, shell=True)
+                print(oneAdd)
+    chefServers.close()
     pause()
 
 # This function is for bootstrapping windows and linux servers
@@ -238,9 +248,6 @@ while True:
 
 
         break
-# print('Remove all cached files? (yes or no)')
-# removeFiles = input().lower()
-# if removeFiles.startswith('y'):
 removeFile()
 removebootstrapping()
 removeRecipe()
