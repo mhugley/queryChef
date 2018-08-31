@@ -16,7 +16,7 @@ def listServers():
     chefServers = open(os.path.join(_location_, 'chefservers.txt'))
     chefServersContent = chefServers.read()
     chefServerList = chefServersContent.split('\n')
-    print(len(chefServerList)-1)
+    print("There are a total of: %s" %(len(chefServerList)-1))
     print('Would you like to see a list of servers? (yes or no)')
     answer = input().lower()
     if answer.startswith('y'):
@@ -36,7 +36,6 @@ def searchList():
     while True:
         print('please enter [server name] or [q] to quit? ')
         serverName = input().lower()
-        print(serverName)
         if serverName == 'q':
             break
         else:
@@ -138,6 +137,7 @@ def bootstrapping():
         runBootstrapping = subprocess.call(serverName, shell=True)
         print(runBootstrapping)
     bootstrapping.close()
+    removebootstrapping()
 
 # Remove Old Servers From Chef Server
 def list5hourOld():
@@ -183,7 +183,10 @@ def recipes1():
 # Deletes File when done
 def removeFile():
     f = os.path.join(_location_, 'chefservers.txt')
-    os.remove(f)
+    try:
+        os.remove(f)
+    except OSError:
+        pass
 
 # Delete bootstrapping file if it exists.
 def removebootstrapping():
@@ -202,6 +205,9 @@ def removeRecipe():
         pass
 
 # Start of Program
+removeFile()
+removebootstrapping()
+removeRecipe()
 print('Welcome to Chef.... Please Wait')
 subprocess.call('knife node list | sort > chefservers.txt', shell=True)
 while True:
@@ -232,9 +238,9 @@ while True:
 
 
         break
-print('Remove all cached files? (yes or no)')
-removeFiles = input().lower()
-if removeFiles.startswith('y'):
-    removeFile()
-    removebootstrapping()
-    removeRecipe()
+# print('Remove all cached files? (yes or no)')
+# removeFiles = input().lower()
+# if removeFiles.startswith('y'):
+removeFile()
+removebootstrapping()
+removeRecipe()
