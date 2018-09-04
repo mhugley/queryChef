@@ -68,29 +68,6 @@ def searchList_regex():
             chefServers.close()
             pause()
 
-# Add recipe to all servers
-def multiRecipe():
-    chefServers = open(os.path.join(_location_, 'chefservers2.txt'))
-    chefServersContent = chefServers.read()
-    chefServerList = chefServersContent.split('\n')
-    recipes = open('recipes.txt', 'a')
-    print('Which recipe would you like to add to all servers?')
-    answer = input()
-    recipes = open('recipes.txt', 'a')
-    for i in range(len(chefServerList)):
-        recipes.write('knife node run_list add ' + chefServerList[i] + ' \'recipe[%s]\' \n' % (answer))
-    print('Would you like to run the recipe? ')
-    runRecipeAnswer = input()
-    runRecipe3 = open(os.path.join(_location_, 'recipes.txt'))
-    runRecipe3Content = runRecipe3.read()
-    runRecipe3List = runRecipe3Content.split('\n')
-    if runRecipeAnswer.lower().startswith('y'):
-        for addRecipe in runRecipe3List:
-            runRecipe = subprocess.call(addRecipe, shell=True)
-            print(runRecipe)
-    recipes.close()
-    chefServers.close()
-
 # Add recipe to specified instance
 def addRecipe():
     recipe = input('Which recipe would you like to add \n')
@@ -115,7 +92,7 @@ def bootstrapping():
         ipaddress = input('What is the ip address?(In AD leave blank)\n ')
         server = input('What is the name of the server?\n ')
         admin = input('What is the admin name?\n ')
-        password = input('Please enter password?\n ')
+        password = input('Please enter password or pem for linux?\n ')
         # password = getpass.getpass('Please enter password?\n')
         recipes = recipes1()
         if ipaddress == '':
@@ -131,7 +108,7 @@ def bootstrapping():
             else:
                 print('You choose linux')
                 installchef = open('bootstrapping.txt', 'a')
-                installchef.write('knife bootstrap %s -N %s -x %s --ssh-password %s --run-list \'%s\' --sudo \n' % (server, server, admin, password, recipes))
+                installchef.write('knife bootstrap %s -N %s -x %s --identity-file %s --run-list \'%s\' --sudo \n' % (server, server, admin, password, recipes))
                 print('Would you like to add another server? (yes, no) ')
                 anotherServer = input().lower()
                 if anotherServer.startswith('n'):
@@ -150,7 +127,7 @@ def bootstrapping():
             else:
                 print('You choose linux')
                 installchef = open('bootstrapping.txt', 'a')
-                installchef.write('knife bootstrap %s -N %s -x %s --ssh-password %s --run-list \'%s\' --sudo \n' % (ipaddress, server, admin, password, recipes))
+                installchef.write('knife bootstrap %s -N %s -x %s --identity-file %s --run-list \'%s\' --sudo \n' % (ipaddress, server, admin, password, recipes))
                 print('Would you like to add another server? (yes, no) ')
                 anotherServer = input().lower()
                 if anotherServer.startswith('n'):
@@ -165,29 +142,35 @@ def bootstrapping():
     bootstrapping.close()
     removebootstrapping()
 
-# Remove Old Servers From Chef Server
-def list5hourOld():
-	print ('This will list all servers that have not communicated with the chef server in 24 hours')
-	# subprocess.call("knife search node \"ohai_time:[* TO $(date +\%s -d \'5 hours ago\')]\"", shell=True)
-	oldServer = "knife search node \"ohai_time:[* TO $(date +\%s -d \'5 hours ago\')]\" -i"
-	for node in oldServer:
-		print(node)
-
+# Remove Servers from ChefServer
 def removeServers():
-        answer = input('Which server would you like to remove?')
-        try:
-        	removeServerText = open('RemoveServers.txt', 'a')
-        except IOError:
-        	print("File not found or path is incorrect")
-        finally:
-	        removeServerText.write('knife node list | grep -i %s' % (answer))
-	        textfile = open(os.path.join(_location_, 'RemoveServers.txt'))
-	        textfileContent = textfile.read()
-	        textfileList = textfileContent.split('\n')
-	        for serverName in textfileList:
-	            runtextfile = subprocess.call(serverName, shell=True)
-	            print(runtextfile)
-	        removeServerText.close()
+    removeServer = []
+    chefServers = open(os.path.join(_location_, 'chefservers.txt'))
+    chefServersContent = chefServers.read()
+    chefServerList = chefServersContent.split('\n')
+    while True:
+        r_server = input("Enter Server you want to remove type r to run or q to quit\n>> ")
+        if r_server == 'q':
+            break
+        elif r_server != 'r':
+            removeServer.append(r_server)
+            print(removeServer)
+        else:
+            break
+    for i in range(len(chefServerList)-1):
+        for k in range(len(removeServer)):
+            if chefServerList[i].lower() == removeServer[k].lower():
+                print("Server[" + str(i + 1) + "]: " + chefServerList[i])
+                r_node = ("knife node delete %s -y" % (chefServerList[i]))
+                r_client = ("knife client delete %s -y" % (chefServerList[i]))
+                r_node_sub = subprocess.call(r_node, shell=True)
+                r_client_sub = subprocess.call(r_client, shell=True)
+                print(r_node_sub)
+                print(r_client_sub)
+            else:
+                continue
+    chefServers.close()
+    pause()
 
 # Add recipes to list and format for bootstapping
 run_list = []
@@ -242,7 +225,7 @@ while True:
     print('Welcome to Chef')
     print('WARNING -- You need to be in your chef-repo')
     print('What would you like to do?')    
-    print('[1] List of servers \n[2] Cookbooks \n[3] Search \n[4] Bootstrapping \n[5] Bulk Add \n[6] Add Recipe \n[7] Remove Old Servers \n[q] Quit')
+    print('[1] List of servers \n[2] Cookbooks \n[3] Search \n[4] Bootstrapping \n[5] Remove Servers From Chef \n[6] Add Recipe \n[q] Quit')
     answer = input('\n>> ')
     if answer == '1':
         listServers()
@@ -253,16 +236,13 @@ while True:
     elif answer == '4':
         bootstrapping()
     elif answer == '5':
-        multiRecipe()
+        removeServers()
     elif answer == '6':
         addRecipe()
     elif answer == '7':
+        # Not working yet
     	list5hourOld()
-    elif answer == '8':
-        removeServers()
     else:
-
-
         break
 removeFile()
 removebootstrapping()

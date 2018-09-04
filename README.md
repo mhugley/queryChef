@@ -10,5 +10,7 @@ Python 3
 * Get total count of servers
 * List all Servers
 * List Cookbooks on Chef Server
-* Search for a specific server
+* Search for servers that start with ??
 * Create a file for bootstrapping servers
+* Remove Servers from ChefServer
+* Add recipe or recipes to server
