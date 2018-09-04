@@ -149,10 +149,8 @@ def removeServers():
     chefServersContent = chefServers.read()
     chefServerList = chefServersContent.split('\n')
     while True:
-        r_server = input("Enter Server you want to remove type r to run or q to quit\n>> ")
-        if r_server == 'q':
-            break
-        elif r_server != 'r':
+        r_server = input("Enter Server you want to remove type r to run\n>> ")
+        if r_server != 'r':
             removeServer.append(r_server)
             print(removeServer)
         else:
