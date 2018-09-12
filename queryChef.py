@@ -85,6 +85,21 @@ def addRecipe():
     chefServers.close()
     pause()
 
+# Add role to specified instance
+def addRole():
+    recipe = input('Which role would you like to add \n')
+    chefServers = open(os.path.join(_location_, 'roleservers.txt'))
+    chefServersContent = chefServers.read()
+    chefServerList = chefServersContent.split('\n')
+    for i in chefServerList:
+            recipeServer = 'knife node run_list add %s \'role[%s]\'' % (i, recipe)
+            add_recipe = input("Are you sure you want to add %s to this recipe %s (y or no)\n>> " % (i, recipe))
+            if add_recipe.startswith('y'):
+                oneAdd = subprocess.call(recipeServer, shell=True)
+                print(oneAdd)
+    chefServers.close()
+    pause()
+
 # This function is for bootstrapping windows and linux servers
 def bootstrapping():
     while True:
@@ -92,14 +107,15 @@ def bootstrapping():
         ipaddress = input('What is the ip address?(In AD leave blank)\n ')
         server = input('What is the name of the server?\n ')
         admin = input('What is the admin name?\n ')
-        password = input('Please enter password or pem for linux?\n ')
-        # password = getpass.getpass('Please enter password?\n')
+        #password = input('Please enter password or pem for linux?\n ')
+        password = getpass.getpass(prompt='Please enter password? ')
+        print(password)
         recipes = recipes1()
         if ipaddress == '':
             if option == '1':
                 print('You choose windows')
                 installchef = open('bootstrapping.txt', 'a')
-                installchef.write('knife bootstrap windows winrm %s -N %s --winrm-user %s --winrm-password %s --run-list \'%s\' \n' % (server, server, admin, password, recipes))
+                installchef.write('knife bootstrap windows winrm %s -N %s --winrm-user "%s" --winrm-password "%s" --run-list \'%s\' \n' % (server, server, admin, password, recipes))
                 print('Would you like to add another server? (yes, no) ')
                 anotherServer = input().lower()
                 if anotherServer.startswith('n'):
@@ -118,7 +134,7 @@ def bootstrapping():
             if option == '1':
                 print('You choose windows')
                 installchef = open('bootstrapping.txt', 'a')
-                installchef.write('knife bootstrap windows winrm %s -N %s --winrm-user %s --winrm-password %s --run-list \'%s\' \n' % (ipaddress, server, admin, password, recipes))
+                installchef.write('knife bootstrap windows winrm %s -N %s --winrm-user "%s" --winrm-password "%s" --run-list \'%s\' \n' % (ipaddress, server, admin, password, recipes))
                 print('Would you like to add another server? (yes, no) ')
                 anotherServer = input().lower()
                 if anotherServer.startswith('n'):
@@ -240,6 +256,8 @@ while True:
     elif answer == '7':
         # Not working yet
     	list5hourOld()
+    elif answer == '8':
+        addRole()
     else:
         break
 removeFile()
