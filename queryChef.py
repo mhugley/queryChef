@@ -109,7 +109,6 @@ def bootstrapping():
         admin = input('What is the admin name?\n ')
         #password = input('Please enter password or pem for linux?\n ')
         password = getpass.getpass(prompt='Please enter password? ')
-        print(password)
         recipes = recipes1()
         if ipaddress == '':
             if option == '1':
@@ -202,7 +201,7 @@ def recipes1():
     print(run_list_modified)
     run_list_modified = run_list_modified.rstrip(',')
     return run_list_modified
-        
+
 # Deletes File when done
 def removeFile():
     f = os.path.join(_location_, 'chefservers.txt')
@@ -238,7 +237,7 @@ while True:
     print('----------------')
     print('Welcome to Chef')
     print('WARNING -- You need to be in your chef-repo')
-    print('What would you like to do?')    
+    print('What would you like to do?')
     print('[1] List of servers \n[2] Cookbooks \n[3] Search \n[4] Bootstrapping \n[5] Remove Servers From Chef \n[6] Add Recipe \n[q] Quit')
     answer = input('\n>> ')
     if answer == '1':
